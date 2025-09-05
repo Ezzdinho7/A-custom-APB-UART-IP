@@ -1,4 +1,3 @@
-
 `timescale 1ns/1ps
 
 module UART_TX_tb;
@@ -38,7 +37,7 @@ module UART_TX_tb;
         .tx_serial(tx_serial)
     );
 
--
+
     // Stimulus process
    
     initial begin
