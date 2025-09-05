@@ -1,16 +1,3 @@
-//======================================================================
-// APB_WRAPPER.v
-//======================================================================
-// This module acts as a wrapper between an APB (Advanced Peripheral Bus)
-// slave interface and a UART (Universal Asynchronous Receiver/Transmitter).
-//
-// Features:
-//  - Provides APB memory-mapped registers to control TX/RX
-//  - Supports transmit, receive, reset, and baud-rate configuration
-//  - Generates status bits (TX busy, TX done, RX busy, RX done, RX error)
-//  - Interfaces with UART transmitter and receiver submodules
-//
-//======================================================================
 
 module APB_WRAPPER #(
     // Parameterized bus widths for flexibility
@@ -19,9 +6,9 @@ module APB_WRAPPER #(
     parameter PRDATA_WIDTH  = 32,   // Read data bus width
     parameter DATA_BITS     = 8     // UART data width (default: 8 bits)
 )(
-    //==============================================================
+   
     // APB Slave Interface (standard signals)
-    //==============================================================
+    
     input                       PCLK,       // APB clock
     input                       PRESETn,    // Active-low reset
     input  [PADDR_WIDTH-1:0]    PADDR,      // Address bus
@@ -33,16 +20,15 @@ module APB_WRAPPER #(
     output reg                  PREADY,     // Ready signal
     output reg                  PSLVERR,    // Error signal
 
-    //==============================================================
+   
     // UART Serial Interface
-    //==============================================================
+    
     output                      tx_serial,  // UART TX pin
     input                       rx_serial   // UART RX pin
 );
 
-    //==============================================================
     // Memory-Mapped Register Address Map
-    //==============================================================
+   
     localparam CTRL_REG_ADDR   = 32'h0000;  // Control register
     localparam STATS_REG_ADDR  = 32'h0001;  // Status register
     localparam TX_DATA_ADDR    = 32'h0002;  // Transmit data register
@@ -58,9 +44,9 @@ module APB_WRAPPER #(
     reg [PWDATA_WIDTH-1:0] rx_data_reg; // Data received
     reg [PWDATA_WIDTH-1:0] baudiv_reg;  // Baud divider configuration
 
-    //==============================================================
+  
     // Control and Status Signal Extraction
-    //==============================================================
+
     wire tx_en, rx_en;       // Enable TX/RX
     wire tx_rst, rx_rst;     // Reset TX/RX
 
@@ -69,9 +55,9 @@ module APB_WRAPPER #(
     assign tx_rst = ctrl_reg[2]; // Bit2: TX reset
     assign rx_rst = ctrl_reg[3]; // Bit3: RX reset
 
-    //==============================================================
+   
     // UART Data Connections
-    //==============================================================
+   
     wire tx_busy, tx_done;              // TX status
     wire rx_busy, rx_done, rx_error;    // RX status
     wire [DATA_BITS-1:0] tx_data_uart;  // TX data path (8-bit)
@@ -81,27 +67,27 @@ module APB_WRAPPER #(
     assign tx_data_uart = tx_data_reg[DATA_BITS-1:0];
     assign baudiv_uart  = baudiv_reg;
 
-    //==============================================================
+    
     // Status Register Bit Assignments
-    //==============================================================
+    
     localparam TX_BUSY_BIT   = 0;
     localparam TX_DONE_BIT   = 1;
     localparam RX_BUSY_BIT   = 2;
     localparam RX_DONE_BIT   = 3;
     localparam RX_ERROR_BIT  = 4;
 
-    //==============================================================
+    
     // APB Simple State Machine
-    //==============================================================
+    
     reg [1:0] apb_state;
 
     localparam APB_IDLE   = 2'b00;
     localparam APB_SETUP  = 2'b01;
     localparam APB_ACCESS = 2'b10;
 
-    //==============================================================
+  
     // APB State Machine Logic
-    //==============================================================
+ 
     always @(posedge PCLK or negedge PRESETn) begin
         if (~PRESETn) begin
             apb_state <= APB_IDLE;
@@ -130,9 +116,9 @@ module APB_WRAPPER #(
         end
     end
 
-    //==============================================================
+   
     // APB Read/Write Logic
-    //==============================================================
+  
     always @(posedge PCLK or negedge PRESETn) begin
         if (~PRESETn) begin
             // Reset registers
@@ -145,9 +131,9 @@ module APB_WRAPPER #(
             PSLVERR     <= 0;
         end else if (PSEL && PENABLE) begin
             if (PWRITE) begin
-                //--------------------------------------------------
+                
                 // Write Cycle
-                //--------------------------------------------------
+            
                 PSLVERR <= 1'b0; // Default: no error
                 case (PADDR)
                     CTRL_REG_ADDR:   ctrl_reg    <= PWDATA;
@@ -156,9 +142,9 @@ module APB_WRAPPER #(
                     default:         PSLVERR     <= 1'b1; // Invalid address
                 endcase
             end else begin
-                //--------------------------------------------------
+        
                 // Read Cycle
-                //--------------------------------------------------
+              
                 PSLVERR <= 1'b0; // Default: no error
                 case (PADDR)
                     CTRL_REG_ADDR:   PRDATA <= ctrl_reg;
@@ -174,22 +160,21 @@ module APB_WRAPPER #(
             end
         end
 
-        //----------------------------------------------------------
         // Update Status Register from UART Core Outputs
-        //----------------------------------------------------------
+     
         stats_reg <= {27'h0, rx_error, rx_done, rx_busy, tx_done, tx_busy};
 
-        //----------------------------------------------------------
+       
         // Capture Received Data into RX Register
-        //----------------------------------------------------------
+      
         if (rx_done) begin
             rx_data_reg <= {24'h0, rx_data_uart}; // Upper 24 bits zero-padded
         end
     end
 
-    //==============================================================
+
     // UART Transmitter Instance
-    //==============================================================
+   
     uart_transmitter #(
         .BAUD_RATE (9600),         // Fixed baud rate
         .CLK_FREQ  (100_000_000),  // 100 MHz system clock
@@ -204,9 +189,9 @@ module APB_WRAPPER #(
         .tx_serial (tx_serial)
     );
 
-    //==============================================================
+
     // UART Receiver Instance
-    //==============================================================
+   
     uart_receiver #(
         .BAUD_RATE (9600),         // Fixed baud rate
         .CLK_FREQ  (100_000_000),  // 100 MHz system clock
@@ -224,3 +209,4 @@ module APB_WRAPPER #(
     );
 
 endmodule
+
