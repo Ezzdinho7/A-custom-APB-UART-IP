@@ -1,4 +1,3 @@
-
 `timescale 1ns/1ps
 module UART_RX_tb;
 
@@ -54,7 +53,7 @@ module UART_RX_tb;
         #50000 $finish;
     end
 
-  -
+  
     // Task to generate UART waveform for a byte
     // - Sends start bit, data bits (LSB first), stop bit
    
@@ -81,4 +80,3 @@ module UART_RX_tb;
     endtask
 
 endmodule
-
