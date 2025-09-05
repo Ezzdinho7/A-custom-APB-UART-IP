@@ -1,23 +1,3 @@
-////////////////////////////////////////////////////////////////////////
-// Module: UART_TX
-// ---------------------------------------------------------------------
-// Description:
-//   This is a Universal Asynchronous Receiver/Transmitter (UART)
-//   transmitter block. It takes parallel input data (tx_data) and
-//   sends it serially bit-by-bit over tx_serial at a configured baud
-//   rate. 
-//
-//   Transmission starts when tx_en is pulsed HIGH for one clock cycle.
-//   The transmitter will then output:
-//       - 1 START bit (logic '0')
-//       - DATA_BITS data bits (LSB first)
-//       - 1 STOP bit (logic '1')
-//   making up one UART frame.
-//
-//   While sending, tx_busy remains HIGH. When transmission is finished,
-//   tx_done produces a single clock-cycle pulse.
-//
-////////////////////////////////////////////////////////////////////////
 
 module UART_TX #(
     parameter BAUD_RATE   = 9600,           // Baud rate in bits/sec
@@ -34,9 +14,9 @@ module UART_TX #(
     output  reg                 tx_serial   // Serial data line
 );
 
-    // -----------------------------------------------------------------
+   
     // Internal constants
-    // -----------------------------------------------------------------
+    
     localparam CLKS_PER_BIT = CLK_FREQ / BAUD_RATE;  // Clock cycles per UART bit
     localparam CNTW = $clog2(CLKS_PER_BIT);          // Width of clock counter
 
@@ -46,17 +26,16 @@ module UART_TX #(
     localparam S_DATA  = 2'b10;  // Sending data bits
     localparam S_STOP  = 2'b11;  // Sending stop bit
 
-    // -----------------------------------------------------------------
+
     // Internal registers
-    // -----------------------------------------------------------------
+   
     reg [1:0] state;                         // Holds current FSM state
     reg [CNTW:0] clk_cnt;                    // Counts cycles for baud timing
     reg [$clog2(DATA_BITS):0] bit_cnt;       // Counts which data bit is sent
     reg [DATA_BITS-1:0] shift_reg;           // Shifting register to serialize data
 
-    // -----------------------------------------------------------------
     // Main sequential process: FSM, counters, TX line
-    // -----------------------------------------------------------------
+    
     always @(posedge PCLK or negedge PRESETn) begin
         if (!PRESETn) begin
             // Reset all outputs and internal states
@@ -72,9 +51,9 @@ module UART_TX #(
             tx_done <= 1'b0;
 
             case (state)
-                // -----------------------------------------------------
+              
                 // IDLE: Waiting for tx_en signal
-                // -----------------------------------------------------
+               
                 S_IDLE: begin
                     tx_serial <= 1'b1;  // Keep line HIGH while idle
                     tx_busy   <= 1'b0;
@@ -88,9 +67,8 @@ module UART_TX #(
                     end
                 end
 
-                // -----------------------------------------------------
                 // START BIT: Send logic '0' for one bit duration
-                // -----------------------------------------------------
+                
                 S_START: begin
                     tx_serial <= 1'b0; // Start bit is LOW
                     if (clk_cnt == CLKS_PER_BIT-1) begin
@@ -100,9 +78,9 @@ module UART_TX #(
                         clk_cnt <= clk_cnt + 1;
                 end
 
-                // -----------------------------------------------------
+               
                 // DATA BITS: Send data LSB first, one bit per baud interval
-                // -----------------------------------------------------
+                
                 S_DATA: begin
                     tx_serial <= shift_reg[0]; // Output least significant bit
                     if (clk_cnt == CLKS_PER_BIT-1) begin
@@ -117,9 +95,9 @@ module UART_TX #(
                         clk_cnt <= clk_cnt + 1;
                 end
 
-                // -----------------------------------------------------
+                
                 // STOP BIT: Send logic '1' for one bit duration
-                // -----------------------------------------------------
+                
                 S_STOP: begin
                     tx_serial <= 1'b1; // Stop bit is HIGH
                     if (clk_cnt == CLKS_PER_BIT-1) begin
@@ -133,3 +111,4 @@ module UART_TX #(
         end
     end
 endmodule
+
