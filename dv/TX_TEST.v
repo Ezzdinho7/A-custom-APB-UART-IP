@@ -1,16 +1,6 @@
 
 `timescale 1ns/1ps
 
-////////////////////////////////////////////////////////////////////////
-// Testbench for UART_TX
-// ---------------------------------------------------------------------
-// What it does:
-//   - Generates a 100 MHz clock
-//   - Applies reset
-//   - Sends three different bytes (0x0F, 0xEE, 0xCD)
-//   - Waits long enough to allow each frame to transmit
-////////////////////////////////////////////////////////////////////////
-
 module UART_TX_tb;
 
     // Parameters consistent with DUT
@@ -31,9 +21,9 @@ module UART_TX_tb;
     wire tx_done;     // Done flag from DUT
     wire tx_serial;   // Serial output from DUT
 
-    // ------------------------------------------------------
+    
     // DUT instantiation
-    // ------------------------------------------------------
+  
     UART_TX #(
         .BAUD_RATE(BAUD_RATE),
         .CLK_FREQ(CLK_FREQ),
@@ -48,9 +38,9 @@ module UART_TX_tb;
         .tx_serial(tx_serial)
     );
 
-    // ------------------------------------------------------
+-
     // Stimulus process
-    // ------------------------------------------------------
+   
     initial begin
         // Initialize signals
         PCLK    = 0;
@@ -70,10 +60,10 @@ module UART_TX_tb;
         #100 $finish;
     end
 
-    // ------------------------------------------------------
+  
     // Task: send_byte
     // Sends one byte by pulsing tx_en and waiting for frame to complete
-    // ------------------------------------------------------
+   
     task send_byte(input [7:0] data);
     begin
         @(negedge PCLK);  // Align with clock
@@ -86,9 +76,10 @@ module UART_TX_tb;
     end
     endtask
 
-    // ------------------------------------------------------
+  
     // Clock generator: 100 MHz ? period = 10 ns
-    // ------------------------------------------------------
+   
     always #5 PCLK = ~PCLK;
+
 
 endmodule
