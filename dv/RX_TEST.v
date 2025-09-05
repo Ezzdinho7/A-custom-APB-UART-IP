@@ -1,10 +1,4 @@
-//////////////////////////////////////////////////////////////
-// TESTBENCH for UART_RX
-// ----------------------------------------------------------
-// Emulates a transmitter sending data to the receiver.
-// Sends multiple bytes at the given baud rate.
-// Checks if the receiver correctly reconstructs them.
-//////////////////////////////////////////////////////////////
+
 `timescale 1ns/1ps
 module UART_RX_tb;
 
@@ -36,14 +30,13 @@ module UART_RX_tb;
         .frame_error(frame_error)
     );
 
-    // ----------------------------------------------------------
     // Generate system clock (100 MHz ? 10 ns period)
-    // ----------------------------------------------------------
+   
     always #5 PCLK = ~PCLK;
 
-    // ----------------------------------------------------------
+   
     // Main test sequence
-    // ----------------------------------------------------------
+  
     initial begin
         // Initialize
         PCLK = 0;
@@ -61,10 +54,10 @@ module UART_RX_tb;
         #50000 $finish;
     end
 
-    // ----------------------------------------------------------
+  -
     // Task to generate UART waveform for a byte
     // - Sends start bit, data bits (LSB first), stop bit
-    // ----------------------------------------------------------
+   
     task send_byte(input [7:0] data);
         integer i;
     begin
@@ -88,3 +81,4 @@ module UART_RX_tb;
     endtask
 
 endmodule
+
